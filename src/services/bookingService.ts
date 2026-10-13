@@ -59,17 +59,26 @@ export async function validateSchedule(
   const dayStart = day.startOf("day").toUTC().toISO();
   const dayEnd = day.plus({ days: 1 }).startOf("day").toUTC().toISO();
 
-  const existing = await client.query(
-    `SELECT s.start_at, s.duration_minutes
-     FROM bookings b
-     JOIN slots s ON s.id = b.slot_id
-     WHERE b.user_id = $1
-       AND b.status = 'confirmed'
-       AND s.start_at >= $2 AND s.start_at < $3
-       AND ($4::uuid IS NULL OR b.id <> $4::uuid)
-     FOR UPDATE OF b`,
-    [userId, dayStart, dayEnd, excludeBookingId ?? null]
-  );
+  
+const existing = await client.query(
+  `SELECT s.start_at, s.duration_minutes
+   FROM bookings b
+   JOIN slots s ON s.id = b.slot_id
+   WHERE b.user_id = $1
+     AND b.status = 'confirmed'
+     AND s.start_at < $3::timestamptz
+     AND s.start_at + s.duration_minutes * INTERVAL '1 minute'
+         > $2::timestamptz
+     AND ($4::uuid IS NULL OR b.id <> $4::uuid)
+   FOR UPDATE OF b`,
+  [
+    userId,
+    start.minus({ hours: 2 }).toUTC().toISO(),
+    end.plus({ hours: 2 }).toUTC().toISO(),
+    excludeBookingId ?? null
+  ]
+);
+
 
   if (existing.rows.length >= 2) {
     throw new BookingError(409, "DAILY_SESSION_LIMIT");
