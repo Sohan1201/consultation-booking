@@ -47,18 +47,38 @@ export async function validateSchedule(
     throw new BookingError(404, "SLOT_NOT_FOUND");
   }
 
-  const slot = slotResult.rows[0];
-  const start = DateTime.fromJSDate(slot.start_at, { zone: "utc" });
-  const end = start.plus({ minutes: slot.duration_minutes });
+  
+const slot = slotResult.rows[0];
+const start = DateTime.fromJSDate(slot.start_at, { zone: "utc" });
+const end = start.plus({ minutes: slot.duration_minutes });
+
+const day = start.setZone(timezone);
+const dayStart = day.startOf("day").toUTC().toISO();
+const dayEnd = day.plus({ days: 1 }).startOf("day").toUTC().toISO();
+
+const dailyCount = await client.query(
+  `SELECT COUNT(*)::int AS total
+   FROM bookings b
+   JOIN slots s ON s.id = b.slot_id
+   WHERE b.user_id = $1
+     AND b.status = 'confirmed'
+     AND s.start_at >= $2::timestamptz
+     AND s.start_at < $3::timestamptz
+     AND ($4::uuid IS NULL OR b.id <> $4::uuid)`,
+  [userId, dayStart, dayEnd, excludeBookingId ?? null]
+);
+
+if (dailyCount.rows[0].total >= 2) {
+  throw new BookingError(409, "DAILY_SESSION_LIMIT");
+}
+
+
 
   if (start.toMillis() <= Date.now()) {
     throw new BookingError(409, "SLOT_IN_THE_PAST");
   }
 
-  const day = start.setZone(timezone);
-  const dayStart = day.startOf("day").toUTC().toISO();
-  const dayEnd = day.plus({ days: 1 }).startOf("day").toUTC().toISO();
-
+  
   
 const existing = await client.query(
   `SELECT s.start_at, s.duration_minutes
@@ -80,10 +100,7 @@ const existing = await client.query(
 );
 
 
-  if (existing.rows.length >= 2) {
-    throw new BookingError(409, "DAILY_SESSION_LIMIT");
-  }
-
+ 
   for (const booking of existing.rows) {
     const existingStart = DateTime.fromJSDate(
       booking.start_at, { zone: "utc" }
