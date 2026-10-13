@@ -34,4 +34,4 @@ The most important cases to verify are simultaneous attempts to book the same sl
 
 **Use of AI**
 
-AI tools assisted with planning, drafting code, explaining implementation choices, debugging errors, and preparing tests and documentation. I am responsible for reviewing the implementation, verifying its behavior, and understanding the code well enough to explain and modify it during the interview.
+AI tools were used to assist with project planning, code drafting, implementation explanations, debugging and  test development. I reviewed and tested the implementation, made decisions about the project structure and behavior, and am responsible for the submitted work. I am continuing to strengthen my understanding of the implementation so that I can explain the technical decisions, demonstrate the behavior, and make modifications during the interview.
