@@ -1,4 +1,4 @@
-Technical Decisions
+﻿Technical Decisions
 
 This document records the main choices made while building the consultation booking API, along with the reasoning behind them and the parts that still need validation.
 
@@ -28,9 +28,13 @@ This approach is easy to understand and test, but it has limitations. It can mis
 
 I did not add authentication, a frontend, or Redis. The assignment allows user identification through a request header and describes Redis as optional, so these additions were not necessary for the requested implementation.
 
-**Remaining validation**
+**Testing and remaining limitations**
 
-The most important cases to verify are simultaneous attempts to book the same slot, the daily limit across local calendar boundaries, the two-hour gap across midnight, and cancellations or rescheduling near the six-hour cutoff. These require tests against PostgreSQL, not just isolated unit tests.
+The test suite covers concurrent attempts to book the same slot, the daily session limit, gaps shorter than and exactly two hours, cancellation and rescheduling cutoffs, occupied destination slots, timezone output, invalid timezone input, and permitted changes outside the cutoff.
+
+The tests cover representative cases, not every possible scenario. Additional testing across local midnight, daylight-saving transitions, database failures, and more complex concurrency interleavings would improve confidence before production use.
+
+
 
 **Use of AI**
 
