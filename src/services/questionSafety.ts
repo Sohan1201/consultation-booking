@@ -13,7 +13,9 @@ const blockedPatterns: Array<{
   },
   {
     reasonCode: "SERIOUS_ILLNESS_OUTCOME",
-    pattern: /\b(will .{0,50} (cancer|serious illness|terminal illness) .{0,30}(kill|cure|survive|recover)|how will .{0,50}(cancer|serious illness|terminal illness) .{0,30}(end|progress)|outcome of .{0,30}(terminal illness|serious illness))\b/i
+    
+    pattern: /\b(will .{0,50}(cancer|serious illness|terminal illness).{0,30}(kill|cure|survive|recover)|will (cancer|a serious illness|the serious illness|a terminal illness|the terminal illness) .{0,50}(kill|cure|survive|recover)|how will .{0,50}(cancer|serious illness|terminal illness).{0,30}(end|progress)|outcome of .{0,30}(terminal illness|serious illness))\b/i
+
   },
   {
     reasonCode: "UNBORN_BABY_GENDER",
